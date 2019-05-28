@@ -262,6 +262,35 @@ class Klaviyo(object):
         api_version = 'v2'
         all_members = self._request('group/{}/members/all'.format(group_id), {}, api_version=api_version)
         return all_members
+    
+    def person(self, person_id, method='GET'):
+        # TODO Add PUT capabilities for 'profile' attribute additions/updates
+        person = self._request('person/{}'.format(person_id), {}, method)
+        return person
+    
+    def person_timeline(self, person_id, metric_id=None, since=None, count=100, sort='desc'):
+        """"
+        args:
+            since: str() or int() next attribute of the previous api call or unix timestamp
+            count: int() number of events retuned
+            sort: str() sort order for timeline
+        """
+        
+        params = {
+            'count': count,
+            'sort': sort,
+            'since': since
+        }
+        params = self._filter_params(params)
+        
+        if metric_id:
+            url = '{}/{}/{}/{}/{}'.format('person',person_id,'metric', metric_id, TIMELINE)
+        else:
+            url = '{}/{}/{}/{}'.format('person',person_id,'metrics', TIMELINE)
+
+        timeline = self._request(url, params)
+        
+        return timeline
 
     def _normalize_timestamp(self, timestamp):
         if isinstance(timestamp, datetime.datetime):
